@@ -1,5 +1,9 @@
-class Config:
-    MYSQL_HOST = 'localhost'
-    MYSQL_USER = 'root'
-    MYSQL_PASSWORD = 'sql123'
-    MYSQL_DB = 'data_user_heroin'
+import mysql.connector
+
+def get_db_connection():
+    return mysql.connector.connect(
+        host='localhost',
+        user='root',
+        password='sql123',
+        database='data_HEROin'
+    )
