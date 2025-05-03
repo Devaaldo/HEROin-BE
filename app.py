@@ -586,7 +586,7 @@ def get_statistics():
     
     # Data responden (untuk tabel)
     respondents_data = []
-    users = User.query.all()
+    users = User.query.order_by(User.id.desc()).limit(10).all()
     
     for user in users:
         # Ambil hasil terbaru untuk user ini
@@ -902,6 +902,41 @@ def initialize_database():
         db.session.commit()
         
         print("Data awal berhasil ditambahkan")
+        
+@app.route('/api/result/<result_id>', methods=['DELETE'])
+def delete_result(result_id):
+    try:
+        # Cari result berdasarkan ID
+        result = Result.query.get(result_id)
+        
+        if not result:
+            return jsonify({'error': 'Hasil tidak ditemukan'}), 404
+        
+        # Hapus semua jawaban terkait
+        Answer.query.filter_by(result_id=result.id).delete()
+        
+        # Simpan user_id sebelum menghapus result
+        user_id = result.user_id
+        
+        # Hapus result
+        db.session.delete(result)
+        db.session.commit()
+        
+        # Periksa apakah user masih memiliki result lain
+        remaining_results = Result.query.filter_by(user_id=user_id).count()
+        
+        # Jika tidak ada result lain, hapus juga user
+        if remaining_results == 0:
+            user = User.query.get(user_id)
+            if user:
+                db.session.delete(user)
+                db.session.commit()
+        
+        return jsonify({'message': 'Data berhasil dihapus'}), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Terjadi kesalahan: {str(e)}'}), 500
 
 if __name__ == '__main__':
     # Panggil fungsi inisialisasi database dalam konteks aplikasi
