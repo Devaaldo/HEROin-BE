@@ -817,7 +817,6 @@ def download_all_reports():
         )
 
 # Inisialisasi database dan data awal (untuk development)
-@app.before_first_request
 def initialize_database():
     # Buat tabel
     db.create_all()
@@ -887,4 +886,8 @@ def initialize_database():
         print("Data awal berhasil ditambahkan")
 
 if __name__ == '__main__':
+    # Panggil fungsi inisialisasi database dalam konteks aplikasi
+    with app.app_context():
+        initialize_database()
+    
     app.run(debug=True)
