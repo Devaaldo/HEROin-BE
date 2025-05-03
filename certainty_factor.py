@@ -1,0 +1,70 @@
+from models import db, Answer, Question, Impact
+from sqlalchemy import func
+
+def calculate_certainty_factor(user_id):
+    """
+    Menghitung certainty factor untuk setiap dampak berdasarkan jawaban pengguna.
+    
+    Args:
+        user_id (int): ID pengguna
+        
+    Returns:
+        dict: Dictionary berisi dampak_id sebagai key dan nilai certainty factor sebagai value
+    """
+    # Dapatkan semua jawaban pengguna
+    answers = Answer.query.filter_by(user_id=user_id).all()
+    
+    # Kelompokkan jawaban berdasarkan dampak
+    impact_answers = {}
+    
+    for answer in answers:
+        question = Question.query.get(answer.question_id)
+        impact_id = question.impact_id
+        
+        if impact_id not in impact_answers:
+            impact_answers[impact_id] = []
+        
+        impact_answers[impact_id].append(answer.certainty_value)
+    
+    # Hitung certainty factor untuk setiap dampak
+    impact_certainties = {}
+    
+    for impact_id, certainty_values in impact_answers.items():
+        # Gunakan metode CF kombinasi untuk menggabungkan beberapa nilai certainty
+        combined_cf = combine_certainty_factors(certainty_values)
+        impact_certainties[impact_id] = combined_cf
+    
+    return impact_certainties
+
+def combine_certainty_factors(certainty_values):
+    """
+    Menggabungkan beberapa nilai certainty factor menggunakan metode kombinasi CF.
+    
+    Formula:
+    CF[H,E1,E2] = CF[H,E1] + CF[H,E2] * (1 - CF[H,E1]) untuk nilai CF positif
+    
+    Args:
+        certainty_values (list): Daftar nilai certainty factor
+        
+    Returns:
+        float: Nilai certainty factor yang telah digabungkan
+    """
+    if not certainty_values:
+        return 0.0
+    
+    # Jika hanya ada satu nilai, langsung kembalikan nilai tersebut
+    if len(certainty_values) == 1:
+        return certainty_values[0]
+    
+    # Mengurutkan nilai dari yang terbesar ke terkecil
+    certainty_values.sort(reverse=True)
+    
+    # Inisialisasi dengan nilai pertama
+    combined_cf = certainty_values[0]
+    
+    # Gabungkan dengan nilai-nilai selanjutnya
+    for cf in certainty_values[1:]:
+        # Formula kombinasi CF
+        combined_cf = combined_cf + cf * (1 - combined_cf)
+    
+    return combined_cf
