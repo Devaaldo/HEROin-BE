@@ -119,23 +119,36 @@ class BackwardChaining:
     def __init__(self, hypothesis_id):
         self.hypothesis_id = hypothesis_id
         self.questions = Question.query.filter_by(hypothesis_id=hypothesis_id).all()
-        
+    
+    # Method ini yang digunakan dalam submit_questionnaire
     def process_answers(self, answers):
         # Implementasi backward chaining sederhana
         # Dalam kasus ini, kita akan menghitung certainty factor berdasarkan jawaban
-        cf_combined = 0
-        
-        if answers:
-            # Kombinasikan semua CF jawaban
-            cf_combined = self.combine_cf_values([float(ans['value']) for ans in answers])
+        if not answers:
+            return 0
             
-        return cf_combined
+        # Validasi nilai input
+        try:
+            cf_values = [float(ans['value']) for ans in answers]
+            # Tambahkan validasi untuk memastikan nilai valid
+            cf_values = [cf for cf in cf_values if -1.0 <= cf <= 1.0]  # Filter nilai yang valid
+            
+            if not cf_values:  # Jika tidak ada nilai yang valid
+                return 0
+                
+            # Kombinasikan semua CF jawaban
+            cf_combined = self.combine_cf_values(cf_values)
+            
+            return cf_combined
+        except (ValueError, KeyError, TypeError) as e:
+            print(f"Error saat memproses jawaban: {e}")
+            return 0  # Nilai default jika terjadi error
     
     def combine_cf_values(self, cf_values):
         if not cf_values:
             return 0
             
-        # Implementasi metode kombinasi CF
+        # Implementasi metode kombinasi CF yang diperbaiki
         cf_result = cf_values[0]
         
         for cf in cf_values[1:]:
@@ -145,12 +158,17 @@ class BackwardChaining:
             # Jika keduanya negatif
             elif cf_result < 0 and cf < 0:
                 cf_result = cf_result + cf * (1 + cf_result)
-            # Jika berbeda tanda
+            # Jika berbeda tanda atau salah satu atau keduanya adalah 0
             else:
-                cf_result = (cf_result + cf) / (1 - min(abs(cf_result), abs(cf)))
-                
+                # Tambahkan pengecekan untuk menghindari pembagian dengan nol
+                denominator = 1 - min(abs(cf_result), abs(cf))
+                if denominator == 0:  # Jika denominator 0, gunakan nilai alternatif
+                    cf_result = (cf_result + cf) / 2  # Ambil rata-rata sebagai alternatif
+                else:
+                    cf_result = (cf_result + cf) / denominator
+                    
         return cf_result
-    
+        
     def get_diagnosis(self, cf_value):
         # Berikan diagnosis berdasarkan nilai CF
         if cf_value >= 0.8:
