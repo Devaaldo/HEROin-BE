@@ -170,7 +170,7 @@ class BackwardChaining:
         return cf_result
         
     def get_diagnosis(self, cf_value):
-        # Berikan diagnosis berdasarkan nilai CF
+    # Berikan diagnosis berdasarkan nilai CF
         if cf_value >= 0.8:
             return "Kecanduan game online tingkat sangat tinggi", "Segera kurangi waktu bermain game dan cari bantuan profesional. Pertimbangkan untuk berkonsultasi dengan psikolog atau konselor kampus untuk strategi penanganan kecanduan."
         elif cf_value >= 0.6:
