@@ -169,4 +169,4 @@ Kontribusi selalu diterima! Silakan buat pull request atau buka issue untuk disk
 
 ## Kontak
 
-email@example.com
+akbarprdn2512@gmail.com
