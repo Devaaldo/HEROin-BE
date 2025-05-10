@@ -2,16 +2,6 @@ from models import db, Answer, Question, Impact
 from sqlalchemy import func
 
 def calculate_certainty_factor(user_id):
-    """
-    Menghitung certainty factor untuk setiap dampak berdasarkan jawaban pengguna.
-    
-    Args:
-        user_id (int): ID pengguna
-        
-    Returns:
-        dict: Dictionary berisi dampak_id sebagai key dan nilai certainty factor sebagai value
-    """
-    # Dapatkan semua jawaban pengguna
     answers = Answer.query.filter_by(user_id=user_id).all()
     
     # Kelompokkan jawaban berdasarkan dampak
@@ -30,29 +20,16 @@ def calculate_certainty_factor(user_id):
     impact_certainties = {}
     
     for impact_id, certainty_values in impact_answers.items():
-        # Gunakan metode CF kombinasi untuk menggabungkan beberapa nilai certainty
         combined_cf = combine_certainty_factors(certainty_values)
         impact_certainties[impact_id] = combined_cf
     
     return impact_certainties
 
 def combine_certainty_factors(certainty_values):
-    """
-    Menggabungkan beberapa nilai certainty factor menggunakan metode kombinasi CF.
-    
-    Formula:
-    CF[H,E1,E2] = CF[H,E1] + CF[H,E2] * (1 - CF[H,E1]) untuk nilai CF positif
-    
-    Args:
-        certainty_values (list): Daftar nilai certainty factor
-        
-    Returns:
-        float: Nilai certainty factor yang telah digabungkan
-    """
     if not certainty_values:
         return 0.0
     
-    # Jika hanya ada satu nilai, langsung kembalikan nilai tersebut
+    # Jika hanya ada satu nilai CF, maka langsung kembalikan nilai tersebut
     if len(certainty_values) == 1:
         return certainty_values[0]
     
