@@ -1,6 +1,6 @@
 # HEROin - Backend
 
-HEROin (Health Evaluation for Reducing Online-gaming negative impact) adalah sistem pakar untuk mengidentifikasi dampak negatif kecanduan game online di kalangan mahasiswa. Backend aplikasi ini menangani logika sistem pakar dengan metode backward chaining dan certainty factor. (Edited)
+HEROin (Health Evaluation for Reducing Online-gaming negative impact) adalah sistem pakar untuk mengidentifikasi dampak negatif kecanduan game online di kalangan mahasiswa. Backend aplikasi ini menangani logika sistem pakar dengan metode backward chaining dan certainty factor.
 
 ## Fitur
 
